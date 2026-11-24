@@ -16,6 +16,12 @@
   margin: 0 auto;
   padding: 24px;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main {
+  flex: 1;
 }
 
 /* Encabezado y Navegación */
@@ -387,4 +393,78 @@
 .acciones-celda {
   display: flex;
   gap: 6px;
+}
+
+/* Pie de Página (Footer) */
+.app-footer {
+  margin-top: 48px;
+  background: linear-gradient(135deg, var(--azul-rey) 0%, var(--morado) 100%);
+  color: var(--blanco);
+  border-radius: 12px;
+  padding: 28px 28px 16px 28px;
+  box-shadow: 0 -4px 14px rgba(30, 58, 138, 0.12);
+}
+
+.footer-contenido {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-marca {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  color: var(--blanco);
+}
+
+.footer-subtitulo {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: #e0e7ff;
+}
+
+.footer-desc,
+.footer-info {
+  margin: 4px 0;
+  font-size: 0.9rem;
+  color: #e0e7ff;
+  line-height: 1.4;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footer-links button {
+  background: none;
+  border: none;
+  color: #e0e7ff;
+  padding: 0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s;
+}
+
+.footer-links button:hover {
+  color: var(--blanco);
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 14px;
+  font-size: 0.85rem;
+  color: #c7d2fe;
+}
+
+.footer-bottom p {
+  margin: 0;
 }

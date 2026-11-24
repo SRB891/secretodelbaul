@@ -1,18 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { IMAGENES_JOYAS, obtenerImagenProducto } from '../assets/imagenesJoyas';
 
 const API_URL = 'http://localhost:3000/api';
-
-const obtenerImagenLocal = (producto) => {
-  if (producto.imagen_url && producto.imagen_url.startsWith('/img/')) {
-    return producto.imagen_url;
-  }
-  const nombre = (producto.nombre || '').toLowerCase();
-  if (nombre.includes('anillo')) return '/img/anillo.svg';
-  if (nombre.includes('collar')) return '/img/collar.svg';
-  if (nombre.includes('pulsera')) return '/img/pulsera.svg';
-  return '/img/default.svg';
-};
 
 export default function Catalogo({ onSeleccionarProducto }) {
   const [productos, setProductos] = useState([]);
@@ -62,9 +52,12 @@ export default function Catalogo({ onSeleccionarProducto }) {
               <div>
                 <img
                   className="producto-img"
-                  src={obtenerImagenLocal(prod)}
+                  src={obtenerImagenProducto(prod)}
                   alt={prod.nombre}
-                  onError={(e) => { e.target.src = '/img/default.svg'; }}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = IMAGENES_JOYAS.default;
+                  }}
                 />
                 <span className="producto-categoria">{prod.categoria}</span>
                 <h3 className="producto-titulo">{prod.nombre}</h3>
