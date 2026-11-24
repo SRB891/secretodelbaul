@@ -1,18 +1,37 @@
 import { useState } from 'react';
 import './App.css';
+import Auth from './components/Auth';
 import Catalogo from './components/Catalogo';
 import Checkout from './components/Checkout';
 import Inventario from './components/Inventario';
 import Rastreo from './components/Rastreo';
 
 export default function App() {
+  const [usuario, setUsuario] = useState(() => {
+    const guardado = localStorage.getItem('usuario_baul');
+    return guardado ? JSON.parse(guardado) : null;
+  });
   const [vista, setVista] = useState('catalogo');
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+
+  const manejarLogin = (datosUsuario) => {
+    setUsuario(datosUsuario);
+    localStorage.setItem('usuario_baul', JSON.stringify(datosUsuario));
+    setVista('catalogo');
+  };
+
+  const cerrarSesion = () => {
+    setUsuario(null);
+    localStorage.removeItem('usuario_baul');
+    setVista('catalogo');
+  };
 
   const irACheckout = (producto) => {
     setProductoSeleccionado(producto);
     setVista('checkout');
   };
+
+  const esAdmin = usuario?.rol === 'admin';
 
   return (
     <div className="app-container">
@@ -21,39 +40,63 @@ export default function App() {
           <h1 className="app-title">El Secreto del Baúl</h1>
           <small className="app-subtitle">Joyería Artesanal & Comercio Electrónico</small>
         </div>
-        <nav className="app-nav">
-          <button
-            className={`nav-btn ${vista === 'catalogo' ? 'active' : ''}`}
-            onClick={() => setVista('catalogo')}
-          >
-            Catálogo
-          </button>
-          <button
-            className={`nav-btn ${vista === 'checkout' ? 'active' : ''}`}
-            onClick={() => setVista('checkout')}
-          >
-            Checkout
-          </button>
-          <button
-            className={`nav-btn ${vista === 'rastreo' ? 'active' : ''}`}
-            onClick={() => setVista('rastreo')}
-          >
-            Rastreo
-          </button>
-          <button
-            className={`nav-btn ${vista === 'inventario' ? 'active' : ''}`}
-            onClick={() => setVista('inventario')}
-          >
-            Inventario (Admin)
-          </button>
-        </nav>
+
+        {usuario && (
+          <nav className="app-nav">
+            <button
+              className={`nav-btn ${vista === 'catalogo' ? 'active' : ''}`}
+              onClick={() => setVista('catalogo')}
+            >
+              Catálogo
+            </button>
+            <button
+              className={`nav-btn ${vista === 'checkout' ? 'active' : ''}`}
+              onClick={() => setVista('checkout')}
+            >
+              Checkout
+            </button>
+            <button
+              className={`nav-btn ${vista === 'rastreo' ? 'active' : ''}`}
+              onClick={() => setVista('rastreo')}
+            >
+              Rastreo
+            </button>
+
+            {esAdmin && (
+              <button
+                className={`nav-btn ${vista === 'inventario' ? 'active' : ''}`}
+                onClick={() => setVista('inventario')}
+              >
+                Inventario (Admin)
+              </button>
+            )}
+
+            <button className="nav-btn btn-salir" onClick={cerrarSesion} title={`Sesión: ${usuario.nombre}`}>
+              Salir ({usuario.nombre.split(' ')[0]})
+            </button>
+          </nav>
+        )}
       </header>
 
       <main className="app-main">
-        {vista === 'catalogo' && <Catalogo onSeleccionarProducto={irACheckout} />}
-        {vista === 'checkout' && <Checkout producto={productoSeleccionado} onVolver={() => setVista('catalogo')} />}
-        {vista === 'rastreo' && <Rastreo />}
-        {vista === 'inventario' && <Inventario />}
+        {!usuario ? (
+          <Auth onLoginExitoso={manejarLogin} />
+        ) : (
+          <>
+            {vista === 'catalogo' && <Catalogo onSeleccionarProducto={irACheckout} />}
+            {vista === 'checkout' && <Checkout producto={productoSeleccionado} onVolver={() => setVista('catalogo')} />}
+            {vista === 'rastreo' && <Rastreo />}
+            {vista === 'inventario' && (
+              esAdmin ? (
+                <Inventario />
+              ) : (
+                <div className="card-panel">
+                  <p className="error-msg">Acceso denegado: esta sección es exclusiva para administradores.</p>
+                </div>
+              )
+            )}
+          </>
+        )}
       </main>
 
       <footer className="app-footer">
@@ -65,14 +108,18 @@ export default function App() {
             </p>
           </div>
 
-          <div className="footer-col">
-            <h4 className="footer-subtitulo">Navegación</h4>
-            <ul className="footer-links">
-              <li><button type="button" onClick={() => setVista('catalogo')}>Catálogo</button></li>
-              <li><button type="button" onClick={() => setVista('rastreo')}>Rastreo de Envío</button></li>
-              <li><button type="button" onClick={() => setVista('inventario')}>Administración</button></li>
-            </ul>
-          </div>
+          {usuario && (
+            <div className="footer-col">
+              <h4 className="footer-subtitulo">Navegación</h4>
+              <ul className="footer-links">
+                <li><button type="button" onClick={() => setVista('catalogo')}>Catálogo</button></li>
+                <li><button type="button" onClick={() => setVista('rastreo')}>Rastreo de Envío</button></li>
+                {esAdmin && (
+                  <li><button type="button" onClick={() => setVista('inventario')}>Administración</button></li>
+                )}
+              </ul>
+            </div>
+          )}
 
           <div className="footer-col">
             <h4 className="footer-subtitulo">Contacto</h4>

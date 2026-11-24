@@ -16,6 +16,54 @@ app.get('/api/health', (req, res) => {
   res.json({ message: 'Servidor Express conectado correctamente' });
 });
 
+// ==========================================
+// AUTENTICACIÓN: REGISTRO E INICIO DE SESIÓN
+// ==========================================
+
+// Registro de Usuario (Rol por defecto: 'cliente')
+app.post('/api/auth/registro', async (req, res) => {
+  const { nombre, email, password } = req.body;
+  if (!nombre || !email || !password) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
+  try {
+    const existe = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email.trim().toLowerCase()]);
+    if (existe.rows.length > 0) {
+      return res.status(400).json({ error: 'Este correo ya está registrado' });
+    }
+    const resultado = await pool.query(
+      'INSERT INTO usuarios (nombre, email, password, rol) VALUES ($1, $2, $3, $4) RETURNING id, nombre, email, rol',
+      [nombre.trim(), email.trim().toLowerCase(), password, 'cliente']
+    );
+    res.status(201).json(resultado.rows[0]);
+  } catch (error) {
+    console.error('Error en registro:', error);
+    res.status(500).json({ error: 'Error al registrar usuario' });
+  }
+});
+
+// Inicio de Sesión
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const resultado = await pool.query(
+      'SELECT id, nombre, email, rol FROM usuarios WHERE email = $1 AND password = $2',
+      [email.trim().toLowerCase(), password]
+    );
+    if (resultado.rows.length === 0) {
+      return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
+    }
+    res.json(resultado.rows[0]);
+  } catch (error) {
+    console.error('Error en login:', error);
+    res.status(500).json({ error: 'Error al iniciar sesión' });
+  }
+});
+
+// ==========================================
+// MÓDULOS DE TIENDA, INVENTARIO Y LOGÍSTICA
+// ==========================================
+
 // RF-01: Consultar Catálogo de Productos
 app.get('/api/productos', async (req, res) => {
   try {
